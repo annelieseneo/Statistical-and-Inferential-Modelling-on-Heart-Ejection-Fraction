@@ -1,0 +1,449 @@
+\documentclass{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lscape}
+\usepackage{setspace}
+\usepackage{scrextend}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage{hyperref}
+\usepackage{color}
+\usepackage{soul}
+\PassOptionsToPackage{hyphens}{url}
+
+
+\title{\normalsize{Statistical Inference and Modeling}\\ {\LARGE\bfseries Trend Analysis of Ejection Fraction to \\Predict Heart Failure Mortalities in Asia}}
+\author{by\\ \\Anne Elvira Maria (0339985)\\Chan Vei Hao (0340525) \\Mun Yin Ting (0341182)\\Neo Ann Yi (0340281) \\Saachin A/L Vijaya Kumar (0341358)}
+
+\date{18th November 2020}
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+\bigskip 
+
+\maketitle{}
+
+\begin{center}
+\LARGE \bfseries Abstract \\
+\end{center}
+\normalsize Heart disease mortalities have been a significant and ever-growing problem in Pakistan. In response to this issue, patient data regarding ejection fraction (EF) and heart failure mortalities were collected at Faisalabad in the province of Punjab in Pakistan. A machine learning model based on the percentage of EF was constructed using logistic regression. The results from these studies indicate that mortality due to heart failure is more common in patients with lower EF compared to patients with higher EF. There is an evident strong relationship between EF and heart failure mortality. This study concludes that the aforementioned machine learning approach to predict the mortality of heart failure patients using EF, is workable within a Pakistani setting.
+
+\newpage 
+\tableofcontents
+
+
+<<>>=
+# Packages to install for this assignment project
+#install.packages("fitdistrplus")
+#remotes::install_github("wilkelab/cowplot")
+@
+
+
+\newpage 
+\section{Introduction}
+Heart failure will occur when the heart muscles are unable to pump sufficient oxygenated blood as needed by the body. Specifically, this refers to left-sided heart failure in relation to ejection fraction (EF). The other two main types of heart failure are right-sided heart failure involving the collection area of "used" blood, and congestive heart failure involving fluid backing up into the lungs. 50\% of heart failure patients have an average life expectancy of at most five years, while 90\% of those in advanced stages do not live past one year. Cardiovascular diseases (CVDs) are found to be the primary cause of death on a global scale, taking up an estimated 13\% of all deaths (WHO, 2020). In Pakistan, as is the study area of this research, the heart disease mortality is at least 1,100 patients each day (Trial Site News, 2019). \\
+Ejection fraction (EF) measures the percentage of blood that can be pumped out by the left ventricle for each heartbeat contraction. 
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|c|c|}
+\hline 
+\textbf{EF Percentage (\%)} & \textbf{Rating} \\ 
+\hline 
+Less than 5 & Low chance of long-term survival \\ 
+\hline 
+5-15 & End-stage, candidate for transplant \\ 
+\hline 
+15-25 & Severely Impaired \\ 
+\hline 
+25-35 & Moderately Impaired \\ 
+\hline 
+35-45 & Mildly Impaired \\ 
+\hline 
+Above 45 & Normal \\ 
+\hline 
+\end{tabular}
+\label{table:ef}
+\caption{Left Ventricular EF (LVEF) Percentages}
+\end{center}
+\end{table}
+
+\noindent EF can be calculated using the following equation :\\   
+Percentage of Ejection Fraction = $\frac{Stroke Volume}{End-diastolic Volume}$ X 100\%\\
+
+\noindent Most heart and vascular diseases will result in gradually lower EF. For instance, cardiomyopathy is a condition that will thicken certain areas of heart tissue, while coronary artery disease will block or narrow the two main arteries that are used to supply blood to the heart muscles. The implications of these include fatigue and inability to exercise, and in the long run will most likely lead to heart failure. Therefore, it is crucial to maintain a healthy EF level to minimise the risks of heart failure and possible mortality.\\ 
+The problem statement addressed by this study is the significant defect in the health system in Pakistan, where the limited health facilities and resources are only capable of treating one-third of its heart disease patients. A better approach is to gather collaborative responses from the population to improve lifestyle choices, such as reducing smoking habits. This will in turn reduce the risks of cardiovascular diseases, as well as that of other health challenges such as obesity, hypertension, and diabetes, that can lead to cardiovascular diseases (Trial Site News, 2019).\\
+The objective of the study is to develop a machine learning model to predict the probability of heart failure mortality based on EF, to suit Pakistan populations. The aim is to emphasise the importance of maintaining a good level of EF by keeping up with a healthy lifestyle, in order to minimise the risks of heart failure mortality. \\
+The content of this study will include a literature review in Section 2 in relation to past research studies conducted on the same study area and under similar settings. Section 3 will discuss the data and methodologies, including the types of research that were carried out, the data collection and analysis techniques, and the research tools and materials utilised. The results of the study will be discussed in depth in Section 4. Section 5 will conclude the information gained through this study, and suggest future research directions to expand on these existing theories, frameworks, and models. 
+
+
+\section{Literature Review}
+The research topic is the impact of ejection fraction (EF) on heart failure mortality. This is relevant since cardiovascular diseases (CVDs) are found to be the primary cause of death on a global scale with an estimated 13\% weightage of all deaths (WHO, 2020). Twenty-five research articles with similar goals and objectives have been explored for the purpose of this literature review. \\
+Related studies have collected data involving adult patients suffering the signs and symptoms of less than 40\% left ventricular EF (LVEF), from a large number of participating centres and regions and investigation sites. For instance, the ASIAN-HF registry includes multinational patient data across eleven Asian regions (Sugiyama et. al., 2020). These patients attend regular follow ups for clinical outcomes of death and hospitalization (MacDonald et. Al., 2019). The primary objective is to analyse heart failure mortalities in relation to various degrees of EF, and develop mathematical or machine learning models to estimate and predict the risk of heart failure mortalities.\\
+The methodologies used are mostly similar to examining the risks of various modes of death by HF duration using the Cox regression model. Further adjustments may be made for the respective confounding variables associated with different study areas (Sugiyama et. al., 2020). Several researchers conducted additional fixed-effect meta-analyses among various participant cohorts. Another popular method utilises multiple linear regression analysis models to visualise the trends of sudden death rates among these patients at different time points of EF during follow-ups.\\
+The primary outcome was a detailed computation of total hospitalizations relating to heart failures, and the corresponding deaths due to cardiovascular issues. The supporting statistical insights relating to death incidences came to an average of 10\% (MacDonald et. Al., 2019). The risks of sudden deaths were seen to decline over time based on newer clinical trial data and advancements in technologies (Sugiyama et. al., 2020). In general, the prognostic models for the modes of death have reasonable performances and are found to be useful in risk stratification for mode-specific death in specific populations. The strengths of the studies, such as including longer time periods and larger data sizes, may have contributed to the highly prediction accuracy and representative results. \\
+Future studies can be conducted to fill up the observed gaps in the current studies. One such gap is the problem of outdated and obsolete data that are irrelevant in today's day and age. All related studies were conducted from 2015 to early 2020 but most include data from as far back as 2013, which will lack updated results as lifestyles change over time and across regions (Sugiyama et. al., 2020). Other than that, the studies followed specific inclusion and exclusion criteria, which may have limited the generalizability of findings. \\
+These identified gaps were filled in through the use of fresher data collected at end of 2015, and the inclusion and exclusion criteria is only restricted to patients diagnosed with left ventricular systolic dysfunction as well as varying degrees of heart failures, as is the study area in this case.
+
+
+\section{Data and Methods}
+\subsection{Data}
+The Heart Failure Clinical Records dataset was extracted from UCI Machine Learning Repository, as at 1st November 2020 from \href{https://archive.ics.uci.edu/ml/datasets/Heart+failure+clinical+records}{\textbf{\textit{dataset source}}}. 299 heart failure patients' health data were collected during the time period of April to December 2015, at the Allied Hospital and the Faisalabad Institute of Cardiology in Faisalabad, the province of Punjab in Pakistan. The patients consist of 194 adult men and 105 adult women, with ages ranging from 40 to 95 years old. The 299 patients were diagnosed with left ventricular systolic dysfunction with varying degrees of heart failures (Chicco and Jurman, 2020). \\
+The original dataset consists of 13 attributes with clinical, body and lifestyle information, and no missing values. The data types include both symmetrical and asymmetrical binary values, quantitative discrete integer, and quantitative continuous float values.\\
+However, for the purpose of this study, the trend analysis and predictive modelling are only interested in the impact of EF on death events of patients with heart failure. Thus, all the other 11 attributes are dropped (Chicco and Jurman, 2020). The predictor attribute 'ejection\_fraction' has quantitative integer values while the target attribute 'DEATH\_EVENT' has asymmetrical binary values. A sample of the records utilised during this study are shown below.
+
+\begin{center}
+\begin{minipage}{0.5\textwidth} 
+
+<<echo=FALSE>>= 
+#loading sample of dataset
+
+dataset <- read.csv("heart_failure_clinical_records_dataset.csv")
+dataset <- cbind (dataset['ejection_fraction'],dataset['DEATH_EVENT'])
+head(dataset)
+@ 
+\end{minipage} 
+\\Figure 1: Sample of Dataset 
+\end{center}
+
+\subsection{Descriptive Statistics}
+Descriptive statistics refer to the analysis of data to describe and summarize data in a meaningful manner. This usually involves computing the measures of central tendency and measures of spread or dispersion (Laerd statistics, n.d.). \\
+The measures of central tendency describe the data through the identification of the central position and thus the typical value within the dataset, and is measured using the arithmetic mean or average, median, and mode. \\
+The measures of spread or dispersion describe the degree of variability of the data points, and is measured using standard deviation, quartiles, and variance. \\
+Both of these measurements are listed in the summary statistics below. 
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{c|ccc}
+Parameter & Overall & Death & Alive\\
+\hline
+Min & 14.00 & 14.00 & 17.00\\
+Max & 80.00 & 70.00 & 80.00\\
+Mean & 38.08 & 33.47 & 40.27\\
+Mode & 35.00 & 25.00 & 35.00\\
+First Quartile & 30.00 & 25.00 & 35.00\\
+Second Quartile (Median) & 38.00 & 30.00 & 38.00\\
+Third Quartile & 45.00 & 38.00 & 45.00\\
+Variance & 140.0635 & 156.8832 & 117.9388\\
+Standard Deviation & 11.8348 & 12.5253 & 10.8600\\
+Coefficient of Variance (CV) & 0.3109 & 0.3742 & 0.2697\\
+\end{tabular}
+\end{center}
+\caption{Summary Statistics of Ejection Fraction}
+\label{table:stats}
+\end{table}
+
+\noindent The mean, median and mode of Ejection Fraction (EF) are approximately equal, thus the attribute's data has an approximately normal distribution. This can also be identified through the symmetric halves between the first and third quartiles as shown in the boxplot in Figure 1b (Lane, n.d.). Note that the mean will be easily affected by outliers. Therefore, the median and mode are more useful to measure central tendency since the data is slightly skewed as illustrated by the boxplot's whiskers.\\
+The coefficient of variation (CV) of EF is approximately 0.3. According to the rule of thumb, CV of less than 1 indicates that the data points are centered, with acceptable dispersion and variability relative to the mean (Kaufmann, 2014). \\
+The pie chart in Figure 1a displays the classification distribution of Death Events of heart failure patients, with 32\% death and 68\% alive. Thus, there is class imbalance, and this will be taken note of for further data visualisations and data analysis later on.
+
+<<echo=FALSE>>= 
+ded <- subset(dataset, dataset['DEATH_EVENT'] ==1)
+alive <- subset(dataset, dataset['DEATH_EVENT'] ==0)
+#head(ded)
+#head(alive)
+#summary(dataset['ejection_fraction']) 
+#summary(ded['ejection_fraction'])
+#summary(alive['ejection_fraction'])
+#summary(dataset['ejection_fraction']) 
+#summary(ded['ejection_fraction'])
+#summary(alive['ejection_fraction'])
+#lapply(dataset['ejection_fraction'],sd)
+#lapply(dataset['ejection_fraction'],var)
+#lapply(ded['ejection_fraction'],sd)
+#lapply(ded['ejection_fraction'],var)
+#lapply(alive['ejection_fraction'],sd)
+#lapply(alive['ejection_fraction'],var)
+cv <- 11.8384 / 38.08 
+cv1 <- 12.5253 / 33.47
+cv2 <- 10.85996 / 40.27 
+#cv
+#cv1
+#cv2
+@
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+<<echo=FALSE>>= 
+d <- sum(dataset['DEATH_EVENT'] == 1)
+a <- sum(dataset['DEATH_EVENT'] == 0)
+
+# Pie Chart with Percentages
+slices <- c(d, a) 
+lbls <- c("Dead", "Alive")
+pct <- round(slices/sum(slices)*100)
+lbls <- paste(lbls, pct) # add percents to labels 
+lbls <- paste(lbls,"%",sep="") # add % to labels 
+colors <- c("tomato","seagreen2")
+pie(slices,labels = lbls, col=colors,
+    main="Pie Chart of Death Events") #title of pie chart
+legend("topright", c("Dead", "Alive"), cex = 0.8, #legend
+       fill = colors)
+@
+\captionof{figure}{Pie Chart of Death Events}
+\label{fig:piechart}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+<<echo=FALSE>>= 
+# boxplot of EF
+boxplot(dataset['ejection_fraction'], main="Boxplot of Ejection Fraction", outline=FALSE, ylab="Ejection Fraction", outwex=0.2, boxwex=0.5, col="mistyrose")
+@
+\captionof{figure}{Box Plot of Ejection Fraction}
+\label{fig:boxplot}
+\end{subfigure}
+\captionof{figure}{Pie Chart of Death Events and Box Plot of Ejection Fraction}
+\label{fig:piebox}
+\end{figure}
+
+\subsection{Inferential Statistics}
+Inferential statistics use representative samples to generalize a population, since statistics relating to entire populations are difficult to collect in most circumstances. This will allow predictions and inferences to be made for the entire population (Frost, 2018). \\
+There are two main stages. Statistical inference uses data analysis to deduce the properties of the probability distribution, whereas inferential statistical analysis will deduce the properties of the entire population, such as through hypothesis testing and obtaining estimates that extend beyond the available scope of observations (Frost, 2018).\\
+The dataset used in this study specifically collects the health data of existing patients with heart failure, which ensures that the samples are relevant to the population. \\
+Thus, the hypothesis for this study is that lower Ejection Fraction values will increase the risk of heart failure mortality.\\
+
+\begin{center}
+\underline{Mathematical Modelling by Fitting Probability Distribution}
+\end{center}
+Only the best goodness-of-fit and most accurate and efficient model for distribution will be chosen and its distribution plot will be generated. Three distributions, namely Gamma, Weibull, Normal, Exponential, and Log-normal, were fitted to the ejection fraction (EF) data. Their log-likelihoods, corrected Akaike's Information Criterion (AIC), and Bayesian Information Criterion (BIC) were compared. \\
+The largest log-likelihood should be selected, since it is the natural logarithm of the likelihood which is used to derive the maximum likelihood estimator of the parameter (Analyttica Datalab, 2019). It is thus indicative of the best goodness-of-fit (Taboga, n.d.). \\
+On the other hand, the smallest AICc and BIC should be selected, since the equation formula is the log likelihood value multiplied by -2 (Fabozzi et al., 2014). They are thus indicative of the least prediction error. 
+
+
+\begin{figure}[H]
+\begin{center}
+<<echo=FALSE,warning=FALSE,message=FALSE>>= 
+# extract ejection fraction column/attribute
+# convert data frame column into numeric
+ef <- as.numeric(dataset$ejection_fraction)
+
+# install.packages("fitdistrplus")
+library("fitdistrplus")
+
+# Fitting Gamma probability distribution
+efgam <- fitdist(dataset$ejection_fraction, "gamma")
+summary(efgam)
+@
+\captionof{figure}{Mathematical Modelling by Fitting Probability Distribution}
+\label{fig:model}
+\end{center}
+\end{figure}
+
+
+\noindent
+
+Note that for this Heart Failure mortality situation, BIC is a better measure since a false positive is as misleading as, and could be more misleading than, a false negative. \\
+Therefore, Gamma distribution is chosen as the best goodness-of-fit and most accurate and efficient model for the distribution of EF data. Its distribution plot is a histogram combined with a best fit curve of frequency density, with two parameters of rate and shape and both having the range of [0, $\infty$]. The rate parameter can be considered as the frequency of event occurrence where smaller values indicate a right-skewed distribution, while smaller shape parameter values also indicate a right-skewed distribution (McNeese, 2016). \\
+The standard error values are used as an intermediate value to compute confidence intervals for the fitted distribution (GraphPad Software, n.d.). Its correlation accuracy of 97.6022\% indicates almost identical directional movements for shape and rate parameters. There is thus a definitive right-skew in the distribution. \\
+The evaluated model can now be used to predict the probability, and forecast the frequency of the magnitude of the event in a certain interval. 
+
+\begin{figure}[H]
+\begin{center}
+<<echo=FALSE,warning=FALSE,message=FALSE>>= 
+# Visualization
+denscomp(efgam, addlegend = "FALSE",
+         main="Histogram and Gamma Distribution of Ejection Fraction", #title of plot
+         datacol = c("mistyrose"),
+         fitcol = c("gray0"),
+         fitlty= c("dashed"),
+         xlab="Ejection Fraction", #x axis label
+         labels=TRUE, 
+         ylim=c(0,0.06), #y axis limit
+         xlim=c(10,80)) #x axis limit
+@
+\captionof{figure}{Histogram and Gamma Distribution of Ejection Fraction}
+\label{fig:hist}
+\end{center}
+\end{figure}
+
+\pagebreak 
+\begin{center}
+\underline{Supervised Machine Learning Modelling using Logistic Regression}
+\begin{figure}[H]
+<<echo=FALSE,warning=FALSE,message=FALSE>>= 
+# Fitting Logistic Regression Machine Learning Model
+glm.fit <- glm(DEATH_EVENT ~ ejection_fraction, data = dataset, family = binomial)
+# Visualize Logistic Regression
+# remotes::install_github("wilkelab/cowplot")
+library(ggplot2)
+library(cowplot)
+ggplot(dataset, aes(y=DEATH_EVENT,x=ejection_fraction)) + 
+  geom_point(aes(color=DEATH_EVENT), alpha = 1, shape = 4, stroke = 2) + 
+  stat_smooth(method="glm", 
+              method.args=list(family="binomial"), 
+              se=FALSE, fullrange=TRUE, color = "red") + xlim(0,90) +
+  scale_color_gradient(low = "#DC1C13", high = "#F6BDC0")
+@
+\captionof{figure}{Logistic Regression Model}
+\label{fig:logreg2}
+\end{figure}
+\end{center}
+
+\noindent Logistic regression is chosen to distinguish the binary outcome values of the target attribute 'DEATH\_EVENT' for classifications and predictions. The factor level of 1 denotes the desired outcome of heart failure mortality. The ggplot() package is used to visualise the Generalized Linear Model (GLM), which is a regression model that provides flexible generalization, between the predictor 'ejection\_fraction' and the target attribute 'DEATH\_EVENT' (R, 2020).
+
+\noindent The logistic regression model outcome is an equation that includes the intercept and the weightages or coefficients. Ejection fraction has rank-3 log odds of -0.0562 with a negligible standard error, and a p-value of approximately 0 that rejects the null hypothesis. This supports the use of EF to determine heart failure mortality, since the predictor is found to be important and relevant, as well as significant (Sirohi, 2018). \\
+The relatively large difference of 24 units between null deviance and residual deviance is the degree of improvement in deviance, after taking EF into account when making predictions. It concludes that the model is a good fit. \\
+These summary measures support the acceptance of the logistic regression model as the final classification model of heart failure mortality. 
+
+\begin{figure}[H]
+\begin{center}
+<<echo=FALSE,warning=FALSE,message=FALSE>>= 
+# Evaluation of the the Logistic Regression model
+summary(glm.fit)
+@
+\captionof{figure}{Summary of Logistic Regression Model}
+\label{fig:logregsum}
+\end{center}
+\end{figure}
+
+
+\section{Results}
+The pie chart in Figure 1a illustrates the significant class imbalance of the target classes of heart failure mortality, where there are 68\% alive and 32\% dead. Simple descriptive statistics will utilize the percentage of each component to compute the fraction of surviving patients at $\frac{17}{25}$ and the risk of heart failure mortality at $\frac{8}{25}$. However, in the case of supervised machine learning modelling, a future improvement is recommended to include unbiased and equally representative data of the two aforementioned classes, in order to ensure the reliability of model estimates and predictions (Jaitley, 2019).\\
+The summary statistics in Table 1 illustrate the differences in mean values. Surviving patients are found to have an average of 7\% higher ejection fraction (EF) than the patients who did not survive, thus providing a clear distinction between the two classes of 'DEATH\_EVENT'. In addition, standard deviations are relatively low, which implies low variabilities and variance, and thus concludes that this set of data is able to produce reliable estimations and predictions on the classification of heart failure mortalities.\\
+The shape of the boxplot in Figure 1b implies an approximate normal distribution as the continuous probability distribution for random variables of EF, and its data is thus expected to follow Central Limit Theorem. However, this method only considers the distribution of data between the first and third quartile, which is only acceptable for simple summary purposes as the exact values and details of the distribution results are not properly recorded. The fitted Gamma probability distribution improves on this by providing a more accurate probability distribution (McNeese, 2016). The more specific information on data patterns and behaviors helps in selecting appropriate choices of statistical tests (McNeese, 2016). This allows the analysis capability to extend beyond the limitation of descriptively graphing raw sample data, and towards formulating population inferences and constructing advanced machine learning models. \\
+The logistic regression model is the final classification model suggested for this study. The results accept the initial hypothesis that lower EF leads to higher risks of heart failure mortality. Specifically, 0.5 is the boundary for logistic regression, where above 0.5 or less than 25\% of EF predicts high likelihood of heart failure mortality, 0.25 to 0.5 or EF between 25\% and 45\% predicts an unlikely case of heart failure mortality, and below 0.25 or above 45\% of EF predicts a very unlikely case of heart failure mortality. These predictions are found to be considerably accurate.\\
+See Section 3.3 Inferential Statistics for model evaluations in terms of model accuracy and errors.
+
+
+\section{Conclusion}
+Ejection fraction has been proven to have a strong association with heart failure mortality. Over 90\% of heart failure patients in advanced stages of decline do not live past one year. Specifically in Pakistan, as is the study area of this research, the heart disease mortality is at least 1,100 patients each day (Trial Site News, 2019). The findings of this study will emphasize the importance of maintaining a healthy level of EF, in hopes of gathering collaborative responses from the population to improve lifestyle choices and in turn reduce the risks of cardiovascular diseases as well as that of other health challenges that can lead to it. In summary, logistic regression is the final machine learning model for the use of classification of heart failure mortality in this study. The model insights support the hypothesis that lower EF will increase the risk of heart failure mortality. This study has strengths in terms of highly accurate models, strong relationship association results between EF and heart failure mortality, and low standard errors, as previously discussed. However, the limitations and thus possible future studies can include further detailed research with bigger sample sizes in order to maximize the analyses possibilities. The participant inclusion and exclusion criteria can be revised to obtain an appropriate level of generalizability of findings. The time period of stages of decline in EF in relation to heart failure mortality, as well as the patterns in the rates of modes of deaths over time, can also be explored in future studies. 
+
+\newpage
+\section {References}
+
+\expandafter\def\expandafter\UrlBreaks\expandafter{\UrlBreaks% save the current one
+  \do\a\do\b\do\c\do\d\do\e\do\f\do\g\do\h\do\i\do\j%
+  \do\k\do\l\do\m\do\n\do\o\do\p\do\q\do\r\do\s\do\t%
+  \do\u\do\v\do\w\do\x\do\y\do\z\do\A\do\B\do\C\do\D%
+  \do\E\do\F\do\G\do\H\do\I\do\J\do\K\do\L\do\M\do\N%
+  \do\O\do\P\do\Q\do\R\do\S\do\T\do\U\do\V\do\W\do\X%
+  \do\Y\do\Z\do\*\do\-\do\~\do\'\do\"\do\-}%
+
+Analyttica Datalab (2019, February 11). \emph{Log-Likelihood- Analyttica Function Series}. Medium. \url{https://medium.com/@analyttica/log-likelihood-analyttica-function-series-cb059e0d379#:~:text=Log\%20Likelihood\%20value\%20is\%20a\%20measure\%20of\%20goodness,look\%20at\%20the\%20value\%20cannot\%20give\%20any\%20indication} \\
+Chicco, D., Jurman, G (2020, February 3). \emph{Machine Learning can predict survival of patients with heart failure from serum creatinine and ejection fraction alone}. BMC Medical Informatics and Decision Making. \url{https://bmcmedinformdecismak.biomedcentral.com/articles/10.1186/s12911-020-1023-5}\\
+Educba. n.d. \emph{GLM in R | Learn How to Construct Generalized Linear Model in R}. EDUCBA. \url {https://www.educba.com/glm-in-r/}. \\
+Fabozzi, F., Focardi, S., Rachev, S., \& Arshanapalli, B. (2014). \emph {The Basics of Financial Economics : Tools, Concepts, and Asset Management Applications}. John Wiley \& Sons, Inc. \url{https://onlinelibrary.wiley.com/doi/pdf/10.1002/9781118856406.app5}. \\
+Frost, J. (2018, October 17). \emph {Difference between Descriptive and Inferential Statistics}. Statistics By Jim. \url{https://statisticsbyjim.com/basics/descriptive-inferential-statistics/}\\
+GraphPad. n.d. \emph {GraphPad Prism 9 Curve Fitting Guide - Standard error of parameters}. Graphpad. \url{https://www.graphpad.com/guides/prism/latest/curve-fitting/reg_standarad_error_of_parameters.htm}.\\
+Jaitley, U. (2019, February 2). \emph {Comparing Different Classification Machine Learning Models for an imbalanced dataset}. Towards Data Science. \url{https://towardsdatascience.com/comparing-different-classification-machine-learning-models-for-an-imbalanced-dataset-fdae1af3677f}\\
+Kaufmann, J. (2014, September 26). \emph {What do you consider a good standard deviation?}. ResearchGate. \url {https://www.researchgate.net/post/What-do-you-consider-a-good-standard-deviation}\\
+Laerd statistics. n.d. \emph {Descriptive and Inferential Statistics}. Laerd statistics. \url{https://statistics.laerd.com/statistical-guides/descriptive-inferential-statistics.php} \\
+Lane, D. n.d. \emph {Introduction to Normal Distributions}. OnlineStatBook. \url{http://onlinestatbook.com/2/normal_distribution/intro.html} \\
+McNeese, B. (2016, September). \emph {Distribution Fitting}. BPI Consulting. \url{https://www.spcforexcel.com/knowledge/basic-statistics/distribution-fitting#:~:text=Not\%20all\%20parameters\%20exist\%20for\%20each\%20distribution.\%20For,estimating\%20the\%20parameters\%20that\%20define\%20the\%20various\%20distributions} \\
+Sirohi, K. (2018, December 24). \emph {Simply Explained Logistic Regression with Example in R}. Towards Data Science. \url{https://towardsdatascience.com/simply-explained-logistic-regression-with-example-in-r-b919acb1d6b3}\\
+Taboga, M. (2017). \emph {Log-likelihood}. Statlect.com. \url{https://www.statlect.com/glossary/log-likelihood}.\\
+WHO. (2020) \emph {Cardiovascular Diseases}. World Health Organisation. \url{https://www.who.int/health-topics/cardiovascular-diseases/#tab=tab_1}\\
+
+
+\section {Appendixes}
+\subsection{Appendix A: Full R Script Code}
+Link to R-Script: \href{https://drive.google.com/file/d/1uWf4yZTzrIjM_hABHKKjx9AT-BUTRQtq/view?usp=sharing}{<link>} \\
+Link to Compiled R-report: \href{https://drive.google.com/file/d/18GYRLtTnuT4z71GOIOxUKbZZtrBGIeKw/view?usp=sharing}{<link>}\\
+Link to R-Studio Visualizations:  \href{https://drive.google.com/drive/folders/1lXSNHq9hdLgQ8uG-BzSw6U_s59BlEi46?usp=sharing}{<link>}\\
+
+<<>>= 
+#loading dataset 
+dataset <- read.csv("heart_failure_clinical_records_dataset.csv")
+#head(dataset)
+
+#dataset with ejection fraction and death event 
+dataset <- cbind (dataset['ejection_fraction'],dataset['DEATH_EVENT'])
+head(dataset)
+
+#summary statistics
+summary(dataset['ejection_fraction'])
+ded <- subset(dataset, dataset['DEATH_EVENT'] ==1)
+alive <- subset(dataset, dataset['DEATH_EVENT'] ==0)
+#head(ded)
+#head(alive)
+d <- sum(dataset['DEATH_EVENT'] == 1)
+a <- sum(dataset['DEATH_EVENT'] == 0)
+summary(dataset['ejection_fraction']) 
+summary(ded['ejection_fraction'])
+summary(alive['ejection_fraction'])
+lapply(dataset['ejection_fraction'],sd)
+lapply(dataset['ejection_fraction'],var)
+lapply(ded['ejection_fraction'],sd)
+lapply(ded['ejection_fraction'],var)
+lapply(alive['ejection_fraction'],sd)
+lapply(alive['ejection_fraction'],var)
+cv <- 11.8384 / 38.08 
+cv1 <- 12.5253 / 33.47
+cv2 <- 10.85996 / 40.27 
+#cv
+#cv1
+#cv2
+
+#boxplot 
+boxplot(dataset['ejection_fraction'], outline=FALSE, 
+        ylab="Ejection Fraction", outwex=0.2, boxwex=0.5, col="mistyrose")
+
+#pie chart with percentages of death event
+slices <- c(d, a) 
+lbls <- c("Dead", "Alive")
+pct <- round(slices/sum(slices)*100)
+colors <- c("red", "green")
+lbls <- paste(lbls, pct) # add percents to labels 
+lbls <- paste(lbls,"%",sep="") # add % to labels 
+pie(slices,labels = lbls, col= colors,
+    main="Pie Chart of Death Events") #title of pie chart
+legend("topleft", c("Dead", "Alive"), cex = 0.8,
+       fill = colors)
+
+
+# extract ejection fraction column/attribute
+# convert data frame column into numeric
+ef <- as.numeric(dataset$ejection_fraction)
+
+#install.packages("fitdistrplus")
+library("fitdistrplus")
+
+# Fitting Gamma probability distribution
+efgam <- fitdist(dataset$ejection_fraction, "gamma")
+summary(efgam)
+
+# Visualization of gamma distribution 
+denscomp(efgam, addlegend = "FALSE",
+         main="Histogram and Gamma Distribution of Ejection Fraction", #title of plot
+         datacol = c("mistyrose"),
+         fitcol = c("gray0"),
+         fitlty= c("dashed"),
+         xlab="Ejection Fraction", #x axis label
+         labels=TRUE, 
+         ylim=c(0,0.06), #y axis limit
+         xlim=c(10,80)) #x axis limit
+
+# Fitting Logistic Regression Machine Learning Model
+glm.fit <- glm(DEATH_EVENT ~ ejection_fraction, data = dataset, family = binomial)
+
+# Evaluation of the logistic regression model
+summary(glm.fit)
+
+# Visualize Logistic Regression
+# remotes::install_github("wilkelab/cowplot")
+library(ggplot2)
+library(cowplot)
+ggplot(dataset, aes(y=DEATH_EVENT,x=ejection_fraction)) + 
+  geom_point(aes(color=DEATH_EVENT), alpha = 1, shape = 4, stroke = 2) + 
+  stat_smooth(method="glm", 
+              method.args=list(family="binomial"), 
+              se=FALSE, fullrange=TRUE, color = "red") + xlim(0,90) +
+  scale_color_gradient(low = "#DC1C13", high = "#F6BDC0")
+@
+
+\pagebreak
+\subsection{Appendix B: Articles Included in Literature Review}
+Link to folder containing 25 Article's cover: \href{https://drive.google.com/drive/folders/1bBjbc8mH1AHWCsgGczEMdIDXQS1Te2Gu?usp=sharing}{<link>} \\
+Link to Literature Review Matrix: \href{https://drive.google.com/file/d/1hvqXwA6yiXqekoqllkQ21KCozjK0VmRt/view?usp=sharing}{<link>}
+
+\subsection{Appendix C: Dataset}
+Link to Heart Failure Clinical Records dataset: \href{https://drive.google.com/file/d/1W7cfpluIjYb_DqzvJ7P4N7M6ciyhAU3x/view?usp=sharing}{<link>}
+
+\subsection{Appendix D: Turnitin Report}
+4\% similarity, from Page 3 to 12. \\
+Link to Turnitin Similarity Report: \href{https://drive.google.com/file/d/1YUa3hC839LWdybc53V05EPa-FkuZWeNW/view?usp=sharing}{<link>}
+
+\end{document}
