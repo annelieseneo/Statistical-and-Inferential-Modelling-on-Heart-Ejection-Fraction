@@ -16,7 +16,6 @@
 
 
 \title{\normalsize{Statistical Inference and Modeling}\\ {\LARGE\bfseries Trend Analysis of Ejection Fraction to \\Predict Heart Failure Mortalities in Asia}}
-\author{by\\ \\Anne Elvira Maria (0339985)\\Chan Vei Hao (0340525) \\Mun Yin Ting (0341182)\\Neo Ann Yi (0340281) \\Saachin A/L Vijaya Kumar (0341358)}
 
 \date{18th November 2020}
 
